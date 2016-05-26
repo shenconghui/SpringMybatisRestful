@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//ibatis.apache.org//DTD Mapper 3.0//EN"
+        "http://ibatis.apache.org/dtd/ibatis-3-mapper.dtd">
+
+<mapper namespace="com.chinasoft.dao.HospitalDao">
+
+    <!--查询全部医院信息-->
+    <select id="findAll" resultType="com.chinasoft.entity.Hospital">
+           select * from hospital;
+    </select>
+
+    <!--根据ID查询医院信息-->
+    <select id="findById" parameterType="java.lang.Integer" resultType="com.chinasoft.entity.Hospital">
+        select * from hospital where id=#{id};
+    </select>
+    <!--根据名称查询医院信息-->
+    <select id="findByName" parameterType="java.lang.String" resultType="com.chinasoft.entity.Hospital">
+        select * from hospital where name=#{name};
+    </select>
+
+    <!--保存一条医院信息-->
+    <insert id="save" parameterType="com.chinasoft.entity.Hospital"
+              keyProperty="id" useGeneratedKeys="true">
+        insert into hospital(name,address,phone,level,website) values(#{name},#{address},#{phone},#{level},#{website});
+    </insert>
+
+    <!--更新医院信息-->
+    <update id="update" parameterType="com.chinasoft.entity.Hospital">
+        update hospital set name=#{name},address=#{address},phone=#{phone},level=#{level},website=#{website}where id=#{hospital.id};
+    </update>
+
+    <!--删除医院信息-->
+    <delete id="delete" parameterType="java.lang.Integer">
+        delect from hospital where id=#{id};
+    </delete>
+
+</mapper>

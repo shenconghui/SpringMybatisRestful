@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xmlns:aop="http://www.springframework.org/schema/aop"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
+       http://www.springframework.org/schema/jdbc
+       http://www.springframework.org/schema/jdbc/spring-jdbc-3.2.xsd
+       http://www.springframework.org/schema/context
+       http://www.springframework.org/schema/context/spring-context.xsd
+       http://www.springframework.org/schema/mvc
+       http://www.springframework.org/schema/mvc/spring-mvc-3.2.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx-3.2.xsd
+       http://www.springframework.org/schema/aop
+       http://www.springframework.org/schema/aop/spring-aop-3.2.xsd">
+
+  <!--配置数据源-->
+  <bean id="ds"
+      class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
+    <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+    <property name="url" value="jdbc:mysql://localhost:3306/netctoss"/>
+    <property name="username" value="root"/>
+    <property name="password" value="root"/>
+  </bean>
+
+  <!--配置sqlSessionFactory-->
+  <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+    <property name="dataSource" ref="ds"/>
+    <property name="mapperLocations" value="classpath:com/chinasoft/entity/*Mapper.xml"/>
+  </bean>
+
+  <!--配置mybatis注解-->
+  <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+    <property name="basePackage" value="com.chinasoft.dao" />
+    <property name="annotationClass" value="com.chinasoft.annotation.MybatisRepository"/>
+  </bean>
+
+  <!--开启注解扫描-->
+  <context:component-scan base-package="com.chinasoft"/>
+
+  <!--支持@RequstMapping请求和@Controller映射-->
+  <mvc:annotation-driven/>
+
+  <!--视图访问配置-->
+  <bean class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+    <property name="prefix" value="/WEB-INF/"/>
+    <property name="suffix" value=".jsp"/>
+  </bean>
+
+  <!--支持RESTFUL访问静态资源-->
+  <mvc:default-servlet-handler/>
+
+  <!--声明事务管理组件-->
+  <bean id="txManager"
+        class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+         <property name="dataSource" ref="ds"/>
+  </bean>
+
+  <!--xml配置声明事务范围及类型-->
+  <tx:advice id="txAdvice" transaction-manager="txManager">
+      <tx:attributes>
+        <tx:method name="find*" read-only="true"/>
+        <tx:method name="add*" propagation="REQUIRED"/>
+        <tx:method name="update*" propagation="REQUIRED"/>
+        <tx:method name="delete*" propagation="REQUIRED"/>
+      </tx:attributes>
+  </tx:advice>
+  <aop:config proxy-target-class="true">
+    <aop:advisor advice-ref="txAdvice" pointcut="within(com.chinasoft.controller..*)"/>
+  </aop:config>
+
+</beans>
